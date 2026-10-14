@@ -1,3 +1,4 @@
+import json
 import re
 from urllib.parse import urlparse, parse_qs
 
@@ -48,12 +49,12 @@ def update_infra():
     # Read main config file
     with open(settings.config_path, "r", encoding="utf8") as file:
         print(f"Reading main config at {settings.config_path}")
-        lines = [x.strip() for x in file.readlines()]
+        config = json.load(file)
 
-        base_domain = lines[0]
-        root_username = lines[2]
-        root_password = lines[3]
-        competitors = [x.split(" ")[0] for x in lines[5:]]
+    base_domain = config["domain"]
+    root_username = config["username"]
+    root_password = config["password"]
+    competitors = [x["username"] for x in config["competitors"]]
 
     # Docker login
     print("Logging into docker")
