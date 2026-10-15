@@ -163,8 +163,14 @@ def update_infra():
             },
         }
     }
+    # Traefik rejects empty sections ("middlewares cannot be a standalone
+    # element") and then drops every file in the directory, including the TLS
+    # store. Leave out empty sections, and write an empty file if none are left.
+    # Opening with "w" truncates in place, which keeps the bind mount intact.
+    traefik_config["http"] = {k: v for k, v in traefik_config["http"].items() if v}
     with open(settings.traefik_config_path, "w", encoding="utf8") as file:
-        yaml.dump(traefik_config, file, sort_keys=False)
+        if traefik_config["http"]:
+            yaml.dump(traefik_config, file, sort_keys=False)
 
     # Push empty containers
     print("Pushing initial containers")
